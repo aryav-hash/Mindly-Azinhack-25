@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f7f9fb;
+  --surface: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --primary: #7c93f6;
+  --primary-strong: #5d75ea;
+  --border: #e5e7eb;
+}
+
+.dark {
+  --bg: #0b1220;
+  --surface: #0f172a;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --primary: #7c93f6;
+  --primary-strong: #aab6ff;
+  --border: #233052;
+}
+
+.card {
+  @apply bg-card border border-border rounded-lg p-4 my-4 shadow-card;
+}
+.btn {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold shadow-sm text-white bg-primary hover:bg-primary-600;
+}
+.btn-outline {
+  @apply bg-transparent text-foreground border border-border;
+}
+.btn-ghost {
+  @apply bg-transparent text-foreground;
+}
+.subtitle { @apply text-muted; }
+.row { @apply flex gap-2 items-center flex-wrap; }
+.list { @apply list-none p-0 m-0; }
+.list li { @apply p-2 border border-dashed border-border rounded-md my-2; }
+.bubble { @apply max-w-[70%] p-3 rounded-xl my-2; }
+.bubble.user { @apply bg-primary text-white ml-auto; }
+.bubble.bot { background-color: rgba(124,147,246,0.12); color: var(--text); }
+
+/* Focus ring */
+input, select, textarea { @apply w-full p-2 rounded-md border border-border bg-card text-foreground outline-none; }
+input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(124,147,246,0.5); }
+
+
