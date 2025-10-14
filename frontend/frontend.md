@@ -1,0 +1,1 @@
+This directory is used to write the frontend code of the project.
