@@ -2,15 +2,32 @@ import { FormEvent, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 
 type Bubble = { role: 'user' | 'bot'; text: string }
+type Metrics = {
+  stress: number
+  anxiety: number
+  loneliness: number
+  motivation: number
+  financial_burden: number
+  academic_pressure: number
+}
 
-async function generateReply(message: string): Promise<string> {
+const getSessionId = () => {
+  let sessionId = localStorage.getItem('mindly_session_id')
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    localStorage.setItem('mindly_session_id', sessionId)
+  }
+  return sessionId
+}
+
+async function generateReply(message: string, sessionId: string): Promise<{response: string, metrics: Metrics}> {
   try {
     const response = await fetch('http://localhost:5000/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, session_id: sessionId }),
     })
     
     if (!response.ok) {
@@ -18,10 +35,13 @@ async function generateReply(message: string): Promise<string> {
     }
     
     const data = await response.json()
-    return data.response
+    return { response: data.response, metrics: data.metrics }
   } catch (error) {
     console.error('Error:', error)
-    return "Sorry, I'm having trouble connecting. Please try again."
+    return { 
+      response: "Sorry, I'm having trouble connecting. Please try again.",
+      metrics: { stress: 0, anxiety: 0, loneliness: 0, motivation: 0, financial_burden: 0, academic_pressure: 0 }
+    }
   }
 }
 
@@ -66,7 +86,7 @@ export default function Chatbot() {
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       <section className="card">
         <h1 className="text-2xl font-bold">Mindly Chatbot</h1>
         <p className="subtitle">A friendly companion for quick check-ins and tips.</p>
@@ -83,11 +103,11 @@ export default function Chatbot() {
                 {b.text}
               </motion.div>
             ))}
-            {loading && <div className="bubble bot">Thinking...</div>}
+            {loading && <div className="bubble bot">Thinking... 💭</div>}
           </div>
           <form onSubmit={onSubmit} className="flex gap-2">
             <input 
-              className="flex-1" 
+              className="flex-1 px-4 py-2 border rounded-lg" 
               value={input} 
               onChange={e=>setInput(e.target.value)} 
               placeholder="Type your message…"
@@ -99,6 +119,30 @@ export default function Chatbot() {
           </form>
         </div>
       </section>
+
+      {currentMetrics && (
+        <section className="card">
+          <h2 className="text-xl font-semibold mb-4">Current Wellness Indicators</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {Object.entries(currentMetrics).map(([key, value]) => (
+              <div key={key} className="p-3 bg-gray-50 rounded-lg">
+                <div className="text-sm text-gray-600 capitalize mb-1">
+                  {key.replace('_', ' ')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${value > 7 ? 'bg-red-500' : value > 4 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                      style={{ width: `${value * 10}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-semibold">{value}/10</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="card">
         <h2 className="text-xl font-semibold">Note</h2>
