@@ -7,7 +7,6 @@ import Home from './pages/Home'
 import Chatbot from './pages/Chatbot'
 import Resources from './pages/Resources'
 import About from './pages/About'
-import Contact from './pages/Contact'
 
 const router = createBrowserRouter([
   {
@@ -18,7 +17,6 @@ const router = createBrowserRouter([
       { path: 'chatbot', element: <Chatbot /> },
       { path: 'resources', element: <Resources /> },
       { path: 'about', element: <About /> },
-      { path: 'contact', element: <Contact /> },
     ],
   },
 ])
