@@ -5,7 +5,7 @@
 .env.test.local
 .env.production.local
 
-# Python
+# Python - updated patterns
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,6 +13,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 env.bak/
 venv.bak/
@@ -79,3 +80,6 @@ coverage/
 .next/
 .nuxt/
 .turbo/
+
+# JAR files (like BFG)
+*.jar
