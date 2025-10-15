@@ -1,5 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { FormEvent, useState } from 'react'
 
 type Bubble = { role: 'user' | 'bot'; text: string }
 type Metrics = {
@@ -14,7 +13,7 @@ type Metrics = {
 const getSessionId = () => {
   let sessionId = localStorage.getItem('mindly_session_id')
   if (!sessionId) {
-    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    sessionId = session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
     localStorage.setItem('mindly_session_id', sessionId)
   }
   return sessionId
@@ -46,42 +45,24 @@ async function generateReply(message: string, sessionId: string): Promise<{respo
 }
 
 export default function Chatbot() {
-  // Added persistent history key
-  const CHAT_LOG_KEY = 'mindly-chat-log'
-
-  // Initialize from localStorage if present
-  const [log, setLog] = useState<Bubble[]>(() => {
-    try {
-      const stored = localStorage.getItem(CHAT_LOG_KEY)
-      if (stored) return JSON.parse(stored)
-    } catch {}
-    return [{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today?" }]
-  })
+  const [log, setLog] = useState<Bubble[]>([{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today? 😊" }])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  // Added welcome message animation and auto-scroll
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [log, loading])
-
-  // Added persistence: save log to localStorage whenever it changes
-  useEffect(() => {
-    try { localStorage.setItem(CHAT_LOG_KEY, JSON.stringify(log)) } catch {}
-  }, [log])
+  const [sessionId] = useState(getSessionId())
+  const [currentMetrics, setCurrentMetrics] = useState<Metrics | null>(null)
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     const text = input.trim()
     if (!text || loading) return
     
-    setLog(l => [...l, { role: 'user', text }]) // Added: state will persist via effect
+    setLog(l => [...l, { role: 'user', text }])
     setInput('')
     setLoading(true)
     
-    const reply = await generateReply(text)
-    setLog(l => [...l, { role: 'bot', text: reply }]) // Added: state will persist via effect
+    const { response: reply, metrics } = await generateReply(text, sessionId)
+    setLog(l => [...l, { role: 'bot', text: reply }])
+    setCurrentMetrics(metrics)
     setLoading(false)
   }
 
@@ -91,17 +72,11 @@ export default function Chatbot() {
         <h1 className="text-2xl font-bold">Mindly Chatbot</h1>
         <p className="subtitle">A friendly companion for quick check-ins and tips.</p>
         <div className="grid grid-rows-[1fr_auto] gap-3 h-[60vh]">
-          <div ref={scrollRef} className="overflow-auto p-3 border border-border rounded-md bg-card">
+          <div className="overflow-auto p-2 border border-border rounded-md bg-card space-y-2">
             {log.map((b, i) => (
-              <motion.div 
-                key={i} 
-                className={`bubble ${b.role}`}
-                initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.18 }}
-              >
+              <div key={i} className={bubble ${b.role}} style={{ whiteSpace: 'pre-wrap' }}>
                 {b.text}
-              </motion.div>
+              </div>
             ))}
             {loading && <div className="bubble bot">Thinking... 💭</div>}
           </div>
@@ -113,9 +88,9 @@ export default function Chatbot() {
               placeholder="Type your message…"
               disabled={loading}
             />
-            <motion.button whileHover={{ scale: loading ? 1 : 1.03 }} whileTap={{ scale: loading ? 1 : 0.98 }} className="btn" type="submit" disabled={loading}>
+            <button className="btn px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" type="submit" disabled={loading}>
               {loading ? 'Sending...' : 'Send'}
-            </motion.button>
+            </button>
           </form>
         </div>
       </section>
@@ -132,8 +107,8 @@ export default function Chatbot() {
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-gray-200 rounded-full h-2">
                     <div 
-                      className={`h-2 rounded-full ${value > 7 ? 'bg-red-500' : value > 4 ? 'bg-yellow-500' : 'bg-green-500'}`}
-                      style={{ width: `${value * 10}%` }}
+                      className={h-2 rounded-full ${value > 7 ? 'bg-red-500' : value > 4 ? 'bg-yellow-500' : 'bg-green-500'}}
+                      style={{ width: ${value * 10}% }}
                     />
                   </div>
                   <span className="text-sm font-semibold">{value}/10</span>
