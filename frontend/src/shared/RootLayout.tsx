@@ -10,37 +10,22 @@ export default function RootLayout() {
       <header className="sticky top-0 z-40">
         {/* Enhanced navbar container with soft gradient and glassmorphism (tone aligned to peakmind.in) */}
         <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-border shadow-card backdrop-blur supports-[backdrop-filter]:bg-white/30 bg-white/40 dark:supports-[backdrop-filter]:bg-card/30 dark:bg-card/40 bg-gradient-to-r from-purple-50/50 via-sky-50/50 to-emerald-50/50 dark:from-purple-400/5 dark:via-sky-400/5 dark:to-emerald-400/5">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border shadow-card backdrop-blur supports-[backdrop-filter]:bg-white/50 bg-white/60 dark:supports-[backdrop-filter]:bg-card/70 dark:bg-card/80 bg-gradient-to-r from-purple-50/70 via-sky-50/70 to-emerald-50/70 dark:from-purple-400/15 dark:via-sky-400/15 dark:to-emerald-400/15">
             <Link to="/" className="inline-flex items-center gap-2 px-3 py-2">
-              {/* Updated Mindly logo - softer, modern, emotionally uplifting */}
-              <motion.span 
-                className="inline-flex items-center justify-center w-9 h-9 rounded-xl"
-                style={{ 
-                  background: 'linear-gradient(135deg, #c7d2fe 0%, #bae6fd 60%, #bbf7d0 100%)',
-                  boxShadow: '0 6px 18px rgba(99, 102, 241, 0.18)'
-                }}
+              {/* Site logo image */}
+              <motion.img 
+                src={`${import.meta.env.BASE_URL}logo.png`} 
+                alt="Mindly logo"
+                className="w-9 h-9 rounded-xl object-contain"
+                style={{ boxShadow: '0 6px 18px rgba(99, 102, 241, 0.18)' }}
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.98 }}
-                aria-hidden
-              >
-                {/* Minimal friendly mark: soft circle with smile + leaf sprout */}
-                {/* Updated Mindly logo - friendly smile + sprout */}
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95"/>
-                      <stop offset="100%" stopColor="#ffffff" stopOpacity="0.85"/>
-                    </linearGradient>
-                  </defs>
-                  <circle cx="12" cy="12" r="8.5" stroke="url(#g1)" strokeWidth="1.4" opacity="0.65" />
-                  <path d="M8.2 12.7c1.2 1 2.7 1.5 3.8 1.5 1.1 0 2.6-.5 3.8-1.5" stroke="url(#g1)" strokeWidth="1.6" strokeLinecap="round"/>
-                  <path d="M12 8.8c0 .8.5 1.5 1.2 1.8 1.1.4 2.1-.4 2.1-1.5 0-1.6-1.7-2.7-3.3-2.1-1 .4-1.6 1.3-1.6 2.3 0 0 0 0 0 0" stroke="url(#g1)" strokeWidth="1.4" strokeLinecap="round"/>
-                </svg>
-              </motion.span>
+                onError={(e)=>{ (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+              />
               <span className="font-semibold text-lg tracking-tight" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto' }}>Mindly</span>
             </Link>
           {/* Enhanced navbar styling - soft gradient container */}
-          <nav className="hidden md:flex items-center gap-1 p-1 rounded-full border border-border relative supports-[backdrop-filter]:bg-white/30 bg-white/20 dark:supports-[backdrop-filter]:bg-card/30 dark:bg-card/20 bg-gradient-to-r from-purple-200/30 via-sky-200/30 to-emerald-200/30 dark:from-purple-400/10 dark:via-sky-400/10 dark:to-emerald-400/10">
+          <nav className="hidden md:flex items-center gap-1 p-1 rounded-full border border-border relative supports-[backdrop-filter]:bg-white/60 bg-white/50 dark:supports-[backdrop-filter]:bg-card/80 dark:bg-card/80 bg-gradient-to-r from-purple-200/60 via-sky-200/60 to-emerald-200/60 dark:from-purple-400/25 dark:via-sky-400/25 dark:to-emerald-400/25">
             <NavLink 
               to="/" 
               end 
@@ -56,6 +41,23 @@ export default function RootLayout() {
                     />
                   )}
                   Home
+                </span>
+              )}
+            </NavLink>
+            <NavLink 
+              to="/booking" 
+              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted hover:text-foreground'}`}
+            >
+              {({ isActive }) => (
+                <span className="relative inline-flex items-center">
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute inset-0 -z-10 rounded-full bg-primary/15 border border-primary/30 shadow-sm"
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  Booking
                 </span>
               )}
             </NavLink>
@@ -147,6 +149,7 @@ export default function RootLayout() {
         >
           <div className="max-w-6xl mx-auto px-4 py-3 grid gap-2">
             <NavLink onClick={()=>setMobileOpen(false)} to="/" end className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>Home</NavLink>
+            <NavLink onClick={()=>setMobileOpen(false)} to="/booking" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>Booking</NavLink>
             <NavLink onClick={()=>setMobileOpen(false)} to="/chatbot" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>Chatbot</NavLink>
             <NavLink onClick={()=>setMobileOpen(false)} to="/resources" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>Resources</NavLink>
             <NavLink onClick={()=>setMobileOpen(false)} to="/about" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>About</NavLink>

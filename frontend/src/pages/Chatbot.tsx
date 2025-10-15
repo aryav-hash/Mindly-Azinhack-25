@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 
 type Bubble = { role: 'user' | 'bot'; text: string }
 type Metrics = {
@@ -9,6 +9,9 @@ type Metrics = {
   financial_burden: number
   academic_pressure: number
 }
+
+const CHAT_LOG_PREFIX = 'mindly_chat_log_'
+const CHAT_METRICS_PREFIX = 'mindly_chat_metrics_'
 
 const getSessionId = () => {
   let sessionId = localStorage.getItem('mindly_session_id')
@@ -45,11 +48,54 @@ async function generateReply(message: string, sessionId: string): Promise<{respo
 }
 
 export default function Chatbot() {
-  const [log, setLog] = useState<Bubble[]>([{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today? 😊" }])
+  const [log, setLog] = useState<Bubble[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [sessionId] = useState(getSessionId())
   const [currentMetrics, setCurrentMetrics] = useState<Metrics | null>(null)
+
+  // Load persisted chat and metrics for this session on mount/session change
+  useEffect(() => {
+    try {
+      const storedLog = localStorage.getItem(CHAT_LOG_PREFIX + sessionId)
+      const storedMetrics = localStorage.getItem(CHAT_METRICS_PREFIX + sessionId)
+      if (storedLog) {
+        setLog(JSON.parse(storedLog))
+      } else {
+        setLog([{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today? 😊" }])
+      }
+      if (storedMetrics) {
+        setCurrentMetrics(JSON.parse(storedMetrics))
+      }
+    } catch {}
+  }, [sessionId])
+
+  // Persist chat log and metrics whenever they change
+  useEffect(() => {
+    try {
+      if (log.length) {
+        localStorage.setItem(CHAT_LOG_PREFIX + sessionId, JSON.stringify(log))
+      }
+    } catch {}
+  }, [log, sessionId])
+
+  useEffect(() => {
+    try {
+      if (currentMetrics) {
+        localStorage.setItem(CHAT_METRICS_PREFIX + sessionId, JSON.stringify(currentMetrics))
+      }
+    } catch {}
+  }, [currentMetrics, sessionId])
+
+  function newConversation() {
+    const welcome = { role: 'bot', text: "Hey! I'm Mindly. How can I support you today? 😊" } as Bubble
+    setLog([welcome])
+    setCurrentMetrics(null)
+    try {
+      localStorage.setItem(CHAT_LOG_PREFIX + sessionId, JSON.stringify([welcome]))
+      localStorage.removeItem(CHAT_METRICS_PREFIX + sessionId)
+    } catch {}
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -69,8 +115,13 @@ export default function Chatbot() {
   return (
     <div className="space-y-4">
       <section className="card">
-        <h1 className="text-2xl font-bold">Mindly Chatbot</h1>
-        <p className="subtitle">A friendly companion for quick check-ins and tips.</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Mindly Chatbot</h1>
+            <p className="subtitle">A friendly companion for quick check-ins and tips.</p>
+          </div>
+          <button onClick={newConversation} className="btn btn-outline">New Conversation</button>
+        </div>
         <div className="grid grid-rows-[1fr_auto] gap-3 h-[60vh]">
           <div className="overflow-auto p-2 border border-border rounded-md bg-card space-y-2">
             {log.map((b, i) => (
