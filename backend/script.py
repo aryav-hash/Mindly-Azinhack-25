@@ -4,6 +4,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 import google.generativeai as genai
+from kb import MentalHealthKnowledgeBase
+from werkzeug.utils import secure_filename
+from pdf_loader import extract_text_from_pdf, chunk_text
+import tempfile
+import os
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -15,6 +20,8 @@ app = Flask(__name__)
 CORS(app) 
 
 user_sessions = {}
+
+knowledge_base = MentalHealthKnowledgeBase()
 
 def extract_metrics(user_message, conversation_history):
     """Extract mental health metrics from user message using AI"""
@@ -141,7 +148,7 @@ Previous Conversation History:
 
 Current User Message: {user_message}
 
-Respond with care and empathy."""
+Respond with care, empathy, and practical guidance based on the knowledge provided above."""
         
         response = model.generate_content(prompt)
         return response.text
@@ -194,7 +201,6 @@ def get_metrics(session_id):
     
     metrics_history = user_sessions[session_id]['metrics_history']
     
-    # Calculate averages
     if metrics_history:
         latest = metrics_history[-1]['metrics']
         avg_metrics = {
@@ -210,6 +216,62 @@ def get_metrics(session_id):
         'average': avg_metrics,
         'history': metrics_history
     })
+
+@app.route('/api/knowledge/upload-pdf', methods=['POST'])
+def upload_pdf():
+    """Upload PDF and add to knowledge base"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    
+    file = request.files['file']
+    category = request.form.get('category', 'general')
+    
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    if not file.filename.endswith('.pdf'):
+        return jsonify({'error': 'Only PDF files allowed'}), 400
+    
+    try:
+        # Save temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+            file.save(tmp.name)
+            
+            # Extract and chunk
+            text = extract_text_from_pdf(tmp.name)
+            chunks = chunk_text(text)
+            
+            # Add to knowledge base
+            for i, chunk in enumerate(chunks):
+                doc_id = f"upload_{category}_{i}_{secure_filename(file.filename)}"
+                metadata = {
+                    "category": category,
+                    "type": "upload",
+                    "source": file.filename
+                }
+                knowledge_base.add_document(chunk, metadata, doc_id)
+            
+            # Clean up
+            os.unlink(tmp.name)
+        
+        return jsonify({
+            'status': 'success',
+            'chunks_added': len(chunks),
+            'filename': file.filename
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/knowledge/add', methods=['POST'])
+def add_knowledge():
+    """Add new knowledge to the database"""
+    data = request.json
+    document = data.get('document')
+    metadata = data.get('metadata', {})
+    doc_id = data.get('id', f"custom_{len(knowledge_base.collection.get()['ids'])}")
+    
+    knowledge_base.add_document(document, metadata, doc_id)
+    return jsonify({'status': 'success', 'message': 'Document added'})
 
 @app.route('/api/health', methods=['GET'])
 def health():
