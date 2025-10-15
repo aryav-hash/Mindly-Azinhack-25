@@ -1,4 +1,5 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 
 type Bubble = { role: 'user' | 'bot'; text: string }
 
@@ -25,21 +26,42 @@ async function generateReply(message: string): Promise<string> {
 }
 
 export default function Chatbot() {
-  const [log, setLog] = useState<Bubble[]>([{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today?" }])
+  // Added persistent history key
+  const CHAT_LOG_KEY = 'mindly-chat-log'
+
+  // Initialize from localStorage if present
+  const [log, setLog] = useState<Bubble[]>(() => {
+    try {
+      const stored = localStorage.getItem(CHAT_LOG_KEY)
+      if (stored) return JSON.parse(stored)
+    } catch {}
+    return [{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today?" }]
+  })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Added welcome message animation and auto-scroll
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+  }, [log, loading])
+
+  // Added persistence: save log to localStorage whenever it changes
+  useEffect(() => {
+    try { localStorage.setItem(CHAT_LOG_KEY, JSON.stringify(log)) } catch {}
+  }, [log])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     const text = input.trim()
     if (!text || loading) return
     
-    setLog(l => [...l, { role: 'user', text }])
+    setLog(l => [...l, { role: 'user', text }]) // Added: state will persist via effect
     setInput('')
     setLoading(true)
     
     const reply = await generateReply(text)
-    setLog(l => [...l, { role: 'bot', text: reply }])
+    setLog(l => [...l, { role: 'bot', text: reply }]) // Added: state will persist via effect
     setLoading(false)
   }
 
@@ -49,9 +71,17 @@ export default function Chatbot() {
         <h1 className="text-2xl font-bold">Mindly Chatbot</h1>
         <p className="subtitle">A friendly companion for quick check-ins and tips.</p>
         <div className="grid grid-rows-[1fr_auto] gap-3 h-[60vh]">
-          <div className="overflow-auto p-2 border border-border rounded-md bg-card">
+          <div ref={scrollRef} className="overflow-auto p-3 border border-border rounded-md bg-card">
             {log.map((b, i) => (
-              <div key={i} className={`bubble ${b.role}`}>{b.text}</div>
+              <motion.div 
+                key={i} 
+                className={`bubble ${b.role}`}
+                initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.18 }}
+              >
+                {b.text}
+              </motion.div>
             ))}
             {loading && <div className="bubble bot">Thinking...</div>}
           </div>
@@ -63,9 +93,9 @@ export default function Chatbot() {
               placeholder="Type your message…"
               disabled={loading}
             />
-            <button className="btn" type="submit" disabled={loading}>
+            <motion.button whileHover={{ scale: loading ? 1 : 1.03 }} whileTap={{ scale: loading ? 1 : 0.98 }} className="btn" type="submit" disabled={loading}>
               {loading ? 'Sending...' : 'Send'}
-            </button>
+            </motion.button>
           </form>
         </div>
       </section>

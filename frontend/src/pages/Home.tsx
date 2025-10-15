@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 
 const QUOTES = [
   { t: 'Small steps every day lead to big changes.', a: 'Mindly' },
@@ -139,25 +140,91 @@ export default function Home() {
 
   return (
     <div>
-      <section className="card">
-        <h1 className="text-2xl font-bold">Welcome to Mindly</h1>
-        <p className="subtitle">A calm space for students to care for their mental health and well-being.</p>
-        <div className="flex gap-2 flex-wrap">
-          <a className="btn" href="/chatbot">Try the Chatbot</a>
-          <a className="btn btn-outline" href="/resources">Explore Resources</a>
+      <motion.section 
+        className="card overflow-hidden"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+      >
+        <div className="grid md:grid-cols-2 gap-6 items-center">
+          <div>
+            <motion.h1 
+              className="text-3xl md:text-4xl font-bold"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+            >
+              Welcome to Mindly
+            </motion.h1>
+            <motion.p 
+              className="subtitle mt-2"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              A calm space for students to care for their mental health and well-being.
+            </motion.p>
+            <motion.div 
+              className="flex gap-2 flex-wrap mt-4"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
+              <motion.a whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="btn" href="/chatbot">Try the Chatbot</motion.a>
+              <motion.a whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="btn btn-outline" href="/resources">Explore Resources</motion.a>
+            </motion.div>
+          </div>
+          <motion.div 
+            className="relative"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <img 
+              src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1600&auto=format&fit=crop"
+              alt="Calm workspace"
+              className="w-full h-56 md:h-64 object-cover rounded-lg border border-border"
+              loading="lazy"
+            />
+            <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-white/10"></div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="card">
+      <motion.section 
+        className="card"
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.5 }}
+      >
         <h2 className="text-xl font-semibold">Daily Motivation</h2>
-        <blockquote className="my-2">
+        <motion.blockquote 
+          className="my-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
           <span>{quote.t}</span>
           <cite className="block subtitle">— {quote.a}</cite>
-        </blockquote>
-        <button onClick={newQuote} className="btn btn-ghost">New quote</button>
-      </section>
+        </motion.blockquote>
+        <motion.button 
+          onClick={newQuote} 
+          className="btn btn-ghost"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          New quote
+        </motion.button>
+      </motion.section>
 
-      <section className="card">
+      <motion.section 
+        className="card"
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+      >
         <h2 className="text-xl font-semibold">Mood Tracker</h2>
         
         {/* Step 1: Mood Selection */}
@@ -167,14 +234,16 @@ export default function Home() {
               <h3 className="text-lg font-semibold mb-4">How are you feeling today? 😊</h3>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {MOOD_LEVELS.map((moodOption) => (
-                  <button
+                  <motion.button
                     key={moodOption.mood}
                     onClick={() => handleMoodSelection(moodOption)}
-                    className={`p-4 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${moodOption.color} hover:shadow-md`}
+                    className={`p-4 rounded-lg border-2 transition-all duration-200 ${moodOption.color} hover:shadow-md`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <div className="text-3xl mb-2">{moodOption.emoji}</div>
                     <div className="text-sm font-medium">{moodOption.mood}</div>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -208,9 +277,9 @@ export default function Home() {
               ))}
             </div>
             <div className="flex gap-2">
-              <button onClick={nextStep} className="btn" disabled={selectedEmotions.length === 0}>
+              <motion.button whileHover={{ scale: selectedEmotions.length ? 1.04 : 1 }} whileTap={{ scale: selectedEmotions.length ? 0.98 : 1 }} onClick={nextStep} className="btn" disabled={selectedEmotions.length === 0}>
                 Continue ({selectedEmotions.length} selected)
-              </button>
+              </motion.button>
             </div>
           </div>
         )}
@@ -242,9 +311,9 @@ export default function Home() {
               ))}
             </div>
             <div className="flex gap-2">
-              <button onClick={nextStep} className="btn">
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }} onClick={nextStep} className="btn">
                 Continue ({selectedTriggers.length} selected)
-              </button>
+              </motion.button>
             </div>
           </div>
         )}
@@ -269,12 +338,12 @@ export default function Home() {
               />
             </div>
             <div className="flex gap-2">
-              <button onClick={saveMoodEntry} className="btn">
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }} onClick={saveMoodEntry} className="btn">
                 Save Entry
-              </button>
-              <button onClick={resetForm} className="btn btn-outline">
+              </motion.button>
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }} onClick={resetForm} className="btn btn-outline">
                 Start Over
-              </button>
+              </motion.button>
             </div>
           </div>
         )}
@@ -282,14 +351,21 @@ export default function Home() {
         {/* Navigation and Clear */}
         <div className="mt-6 pt-4 border-t border-border">
           <div className="flex gap-2">
-            <button className="btn btn-outline" onClick={clearMoods}>Clear All Entries</button>
+            <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }} className="btn btn-outline" onClick={clearMoods}>Clear All Entries</motion.button>
           </div>
         </div>
         <div className="mt-4">
           <h3 className="font-semibold">Your recent entries</h3>
           <div className="space-y-3">
             {recent.map((e,i)=> (
-              <div key={i} className="p-3 border border-border rounded-lg bg-card">
+              <motion.div 
+                key={i} 
+                className="p-3 border border-border rounded-lg bg-card"
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">{e.emoji}</span>
                   <span className="font-medium">{e.mood}</span>
@@ -318,11 +394,11 @@ export default function Home() {
                     "{e.note}"
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
     </div>
   )
 }
