@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion'
 import { CheckCircle, Target, Bell, Award, Heart, Brain, BookOpen, Moon, Wind, Smile, Trash2, Edit2, Calendar, Play, Pause, RotateCcw } from 'lucide-react';
 
 interface Goal {
@@ -578,10 +579,16 @@ export default function Resources() {
   };
   return (
     <div className="space-y-6">
-      <section className="card">
+      <motion.section 
+        className="card"
+        initial={{ opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.4 }}
+      >
         <h1 className="text-2xl font-bold">Resources</h1>
         <p className="subtitle">Goal-based modules and integrated mental health practices for holistic well-being</p>
-      </section>
+      </motion.section>
 
       {/* Tab Navigation */}
       <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
@@ -815,9 +822,11 @@ export default function Resources() {
         <div className="space-y-6">
           {!activePractice ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
+              <motion.button
                 onClick={() => setActivePractice('breathing')}
                 className="card hover:shadow-lg transition-shadow text-left"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <div className="flex items-start gap-3">
                   <Wind className="w-8 h-8 text-blue-500 flex-shrink-0" />
@@ -826,11 +835,13 @@ export default function Resources() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">Calm your mind with guided breathing techniques</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
                 onClick={() => setActivePractice('meditation')}
                 className="card hover:shadow-lg transition-shadow text-left"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <div className="flex items-start gap-3">
                   <Brain className="w-8 h-8 text-purple-500 flex-shrink-0" />
@@ -839,11 +850,13 @@ export default function Resources() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">Structured meditation practices for mental clarity</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
                 onClick={() => setActivePractice('journaling')}
                 className="card hover:shadow-lg transition-shadow text-left"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <div className="flex items-start gap-3">
                   <BookOpen className="w-8 h-8 text-green-500 flex-shrink-0" />
@@ -852,11 +865,13 @@ export default function Resources() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">Reflective writing for emotional processing</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
                 onClick={() => setActivePractice('mindfulness')}
                 className="card hover:shadow-lg transition-shadow text-left"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <div className="flex items-start gap-3">
                   <Smile className="w-8 h-8 text-yellow-500 flex-shrink-0" />
@@ -865,11 +880,13 @@ export default function Resources() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">Present-moment awareness exercises</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
                 onClick={() => setActivePractice('stress')}
                 className="card hover:shadow-lg transition-shadow text-left"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <div className="flex items-start gap-3">
                   <Heart className="w-8 h-8 text-red-500 flex-shrink-0" />
@@ -878,11 +895,13 @@ export default function Resources() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">Effective techniques to reduce stress</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
                 onClick={() => setActivePractice('sleep')}
                 className="card hover:shadow-lg transition-shadow text-left"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <div className="flex items-start gap-3">
                   <Moon className="w-8 h-8 text-indigo-500 flex-shrink-0" />
@@ -891,7 +910,7 @@ export default function Resources() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">Improve your sleep quality and routine</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
             </div>
           ) : (
             <>
