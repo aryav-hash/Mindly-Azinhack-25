@@ -8,6 +8,7 @@ import Chatbot from './pages/Chatbot'
 import Resources from './pages/Resources'
 import About from './pages/About'
 import Booking from './pages/Booking'
+import Questionnaire from './pages/Questionnaire'
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { path: 'resources', element: <Resources /> },
       { path: 'about', element: <About /> },
       { path: 'booking', element: <Booking /> },
+      { path: 'questionnaire', element: <Questionnaire /> },
     ],
   },
 ])

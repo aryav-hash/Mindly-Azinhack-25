@@ -27,7 +27,7 @@ export default function RootLayout() {
             <NavLink 
               to="/" 
               end 
-              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted hover:text-foreground'}`}
+              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted dark:text-foreground hover:text-foreground'}`}
             >
               {({ isActive }) => (
                 <span className="relative inline-flex items-center">
@@ -44,7 +44,7 @@ export default function RootLayout() {
             </NavLink>
             <NavLink 
               to="/booking" 
-              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted hover:text-foreground'}`}
+              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted dark:text-foreground hover:text-foreground'}`}
             >
               {({ isActive }) => (
                 <span className="relative inline-flex items-center">
@@ -61,7 +61,7 @@ export default function RootLayout() {
             </NavLink>
             <NavLink 
               to="/chatbot" 
-              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted hover:text-foreground'}`}
+              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted dark:text-foreground hover:text-foreground'}`}
             >
               {({ isActive }) => (
                 <span className="relative inline-flex items-center">
@@ -78,7 +78,7 @@ export default function RootLayout() {
             </NavLink>
             <NavLink 
               to="/resources" 
-              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted hover:text-foreground'}`}
+              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted dark:text-foreground hover:text-foreground'}`}
             >
               {({ isActive }) => (
                 <span className="relative inline-flex items-center">
@@ -94,8 +94,25 @@ export default function RootLayout() {
               )}
             </NavLink>
             <NavLink 
+              to="/questionnaire" 
+              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted dark:text-foreground hover:text-foreground'}`}
+            >
+              {({ isActive }) => (
+                <span className="relative inline-flex items-center">
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute inset-0 -z-10 rounded-full bg-primary/15 border border-primary/30 shadow-sm"
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  Questionnaire
+                </span>
+              )}
+            </NavLink>
+            <NavLink 
               to="/about" 
-              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted hover:text-foreground'}`}
+              className={({isActive})=>`relative px-4 py-2 rounded-full text-sm font-medium transition ${isActive? 'text-foreground' : 'text-muted dark:text-foreground hover:text-foreground'}`}
             >
               {({ isActive }) => (
                 <span className="relative inline-flex items-center">
@@ -146,11 +163,12 @@ export default function RootLayout() {
           className="md:hidden border-t border-border bg-card/90 overflow-hidden"
         >
           <div className="max-w-6xl mx-auto px-4 py-3 grid gap-2">
-            <NavLink onClick={()=>setMobileOpen(false)} to="/" end className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>Home</NavLink>
-            <NavLink onClick={()=>setMobileOpen(false)} to="/booking" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>Booking</NavLink>
-            <NavLink onClick={()=>setMobileOpen(false)} to="/chatbot" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>Chatbot</NavLink>
-            <NavLink onClick={()=>setMobileOpen(false)} to="/resources" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>Resources</NavLink>
-            <NavLink onClick={()=>setMobileOpen(false)} to="/about" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted hover:text-foreground hover:bg-primary/5'}`}>About</NavLink>
+            <NavLink onClick={()=>setMobileOpen(false)} to="/" end className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted dark:text-foreground hover:text-foreground hover:bg-primary/5 dark:hover:bg-card/60'}`}>Home</NavLink>
+            <NavLink onClick={()=>setMobileOpen(false)} to="/booking" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted dark:text-foreground hover:text-foreground hover:bg-primary/5 dark:hover:bg-card/60'}`}>Booking</NavLink>
+            <NavLink onClick={()=>setMobileOpen(false)} to="/chatbot" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted dark:text-foreground hover:text-foreground hover:bg-primary/5 dark:hover:bg-card/60'}`}>Chatbot</NavLink>
+            <NavLink onClick={()=>setMobileOpen(false)} to="/resources" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted dark:text-foreground hover:text-foreground hover:bg-primary/5 dark:hover:bg-card/60'}`}>Resources</NavLink>
+            <NavLink onClick={()=>setMobileOpen(false)} to="/questionnaire" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted dark:text-foreground hover:text-foreground hover:bg-primary/5 dark:hover:bg-card/60'}`}>Questionnaire</NavLink>
+            <NavLink onClick={()=>setMobileOpen(false)} to="/about" className={({isActive})=>`px-3 py-2 rounded-md ${isActive? 'bg-primary/10 text-foreground' : 'text-muted dark:text-foreground hover:text-foreground hover:bg-primary/5 dark:hover:bg-card/60'}`}>About</NavLink>
           </div>
         </motion.div>
       </header>

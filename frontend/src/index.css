@@ -9,7 +9,8 @@
   --muted: #6b7280;
   --primary: #7c93f6;
   --primary-strong: #5d75ea;
-  --border: #e5e7eb;
+  /* Stronger border in light mode for better button/outline contrast */
+  --border: #111827; /* gray-900 */
   --bg-gradient: radial-gradient(1200px 600px at 10% -10%, rgba(124,147,246,0.18), transparent 40%),
                   radial-gradient(900px 500px at 90% 10%, rgba(124,147,246,0.12), transparent 40%),
                   linear-gradient(180deg, #f7f9fb 0%, #eef2f7 100%);
@@ -35,8 +36,10 @@
   @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold shadow-sm text-white bg-primary hover:bg-primary-600;
 }
 .btn-outline {
-  @apply bg-transparent text-foreground border border-border;
+  @apply text-foreground border border-border bg-white shadow-sm dark:bg-transparent;
 }
+.btn-outline:hover { background-color: rgba(0,0,0,0.04); }
+.dark .btn-outline:hover { background-color: rgba(255,255,255,0.06); }
 .btn-ghost {
   @apply bg-transparent text-foreground;
 }
