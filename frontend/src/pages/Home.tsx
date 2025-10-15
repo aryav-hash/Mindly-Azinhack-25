@@ -200,7 +200,6 @@ export default function Home() {
                 const id = setInterval(() => setIdx(i => (i + 1) % HERO_IMAGES.length), 4500)
                 return () => clearInterval(id)
               }, [])
-              // Preload next image
               useEffect(() => {
                 const next = new Image(); next.src = HERO_IMAGES[(idx + 1) % HERO_IMAGES.length]
               }, [idx])
