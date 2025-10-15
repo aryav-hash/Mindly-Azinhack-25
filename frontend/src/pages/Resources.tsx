@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion'
-import { CheckCircle, Target, Bell, Award, Heart, Brain, BookOpen, Moon, Wind, Smile, Trash2, Edit2, Calendar, Play, Pause, RotateCcw } from 'lucide-react';
+import { CheckCircle, Target, Bell, Award, Heart, Brain, BookOpen, Moon, Wind, Smile, Trash2, Edit2, Calendar, Play, Pause, RotateCcw, ExternalLink } from 'lucide-react';
 
 interface Goal {
   id: string;
@@ -577,6 +577,101 @@ export default function Resources() {
         return null;
     }
   };
+  
+  // Learning Hub data
+  type LearningType = 'all' | 'article' | 'blog' | 'video';
+  const [learningFilter, setLearningFilter] = useState<LearningType>('all');
+  const learningItems: Array<{
+    title: string;
+    type: 'article' | 'blog' | 'video';
+    source: string;
+    url: string;
+    summary: string;
+    tags: string[];
+    duration?: string;
+  }> = [
+    // Articles
+    {
+      title: 'Understanding Stress',
+      type: 'article',
+      source: 'Mind (UK)',
+      url: 'https://www.mind.org.uk/information-support/types-of-mental-health-problems/stress/',
+      summary: 'Causes, symptoms, and practical strategies for managing stress.',
+      tags: ['stress', 'education', 'coping']
+    },
+    {
+      title: 'Grounding Techniques',
+      type: 'article',
+      source: 'Healthline',
+      url: 'https://www.healthline.com/health/grounding-techniques',
+      summary: 'Simple methods to reduce anxiety by reconnecting with the present.',
+      tags: ['anxiety', 'mindfulness']
+    },
+    {
+      title: 'Meditation for Beginners',
+      type: 'article',
+      source: 'Headspace',
+      url: 'https://www.headspace.com/meditation/meditation-for-beginners',
+      summary: 'Start meditating with step-by-step guidance and tips.',
+      tags: ['meditation', 'mindfulness']
+    },
+    // Blogs
+    {
+      title: 'How to Build a Study Rhythm (Pomodoro)',
+      type: 'blog',
+      source: 'Todoist Blog',
+      url: 'https://todoist.com/productivity-methods/pomodoro-technique',
+      summary: 'Use focused intervals and breaks to reduce overwhelm.',
+      tags: ['study', 'productivity']
+    },
+    {
+      title: 'Sleep Hygiene for Students',
+      type: 'blog',
+      source: 'Sleep Foundation',
+      url: 'https://www.sleepfoundation.org/sleep-hygiene',
+      summary: 'Improve sleep quality with science-backed practices.',
+      tags: ['sleep', 'wellness']
+    },
+    {
+      title: 'Daily Mindfulness: Small Steps, Big Impact',
+      type: 'blog',
+      source: 'Mindful.org',
+      url: 'https://www.mindful.org/meditation/mindfulness-getting-started/',
+      summary: 'Accessible ways to add mindfulness to your day.',
+      tags: ['mindfulness', 'habits']
+    },
+    // Videos
+    {
+      title: '4-7-8 Breathing Technique',
+      type: 'video',
+      source: 'Andrew Weil, M.D. (YouTube)',
+      url: 'https://www.youtube.com/watch?v=gz4G31LGyog',
+      summary: 'A quick, calming practice to reduce stress and aid sleep.',
+      tags: ['breathing', 'calm'],
+      duration: '3 min'
+    },
+    {
+      title: 'Box Breathing Guide',
+      type: 'video',
+      source: 'VA Whole Health (YouTube)',
+      url: 'https://www.youtube.com/watch?v=tEmt1Znux58',
+      summary: 'Steady four-part breath to reduce anxiety and refocus.',
+      tags: ['breathing', 'anxiety'],
+      duration: '5 min'
+    },
+    {
+      title: 'Mindful Walking Practice',
+      type: 'video',
+      source: 'UCLA Mindful (YouTube)',
+      url: 'https://www.youtube.com/watch?v=R2bO1QFrb8U',
+      summary: 'Guided mindful walk to reconnect with your senses.',
+      tags: ['mindfulness', 'movement'],
+      duration: '12 min'
+    }
+  ];
+  const filteredItems = learningFilter === 'all' 
+    ? learningItems 
+    : learningItems.filter(i => i.type === learningFilter);
   return (
     <div className="space-y-6">
       <motion.section 
@@ -588,6 +683,89 @@ export default function Resources() {
       >
         <h1 className="text-2xl font-bold">Resources</h1>
         <p className="subtitle">Goal-based modules and integrated mental health practices for holistic well-being</p>
+      </motion.section>
+
+      {/* Learning Hub - Curated Articles, Blogs, Videos (moved to top) */}
+      <motion.section 
+        className="card"
+        initial={{ opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.4 }}
+      >
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div>
+            <h2 className="text-xl font-semibold">Learning Hub</h2>
+            <p className="subtitle">Curated reads and videos for focused, credible learning</p>
+          </div>
+          <div className="hidden md:flex gap-2">
+            {(['all','article','blog','video'] as LearningType[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => setLearningFilter(t)}
+                className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${
+                  learningFilter === t ? 'bg-primary text-white border-primary' : 'border-border text-gray-600 dark:text-gray-300 hover:bg-primary/10'
+                }`}
+              >
+                {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1) + (t === 'video' ? 's' : 's')}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* Mobile filter */}
+        <div className="md:hidden mb-3">
+          <select 
+            value={learningFilter} 
+            onChange={(e)=>setLearningFilter(e.target.value as LearningType)} 
+          >
+            <option value="all">All</option>
+            <option value="article">Articles</option>
+            <option value="blog">Blogs</option>
+            <option value="video">Videos</option>
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredItems.map((item, idx) => (
+            <motion.a
+              key={item.url}
+              href={item.url}
+              target="_blank"
+              rel="noopener"
+              className="block group border border-border rounded-lg p-4 bg-white/90 dark:bg-card hover:shadow-card transition-all"
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.35, delay: idx * 0.03 }}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                      item.type === 'video' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-700' :
+                      item.type === 'blog' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700' :
+                      'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 border-indigo-200 dark:border-indigo-700'
+                    }`}>
+                      {item.type === 'video' ? 'Video' : item.type === 'blog' ? 'Blog' : 'Article'}
+                    </span>
+                    {item.duration && (
+                      <span className="text-xs text-gray-600 dark:text-gray-400">{item.duration}</span>
+                    )}
+                  </div>
+                  <h3 className="font-semibold leading-snug group-hover:underline">{item.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{item.source}</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary mt-1" />
+              </div>
+              <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">{item.summary}</p>
+              <div className="flex flex-wrap gap-1 mt-3">
+                {item.tags.map(tag => (
+                  <span key={tag} className="px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">#{tag}</span>
+                ))}
+              </div>
+            </motion.a>
+          ))}
+        </div>
       </motion.section>
 
       {/* Tab Navigation */}
@@ -787,7 +965,6 @@ export default function Resources() {
               ))}
             </div>
           </section>
-
           {/* Milestone Celebrations */}
           <section className="card bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-2 border-yellow-200 dark:border-yellow-800">
             <div className="flex items-start gap-3">
@@ -910,8 +1087,8 @@ export default function Resources() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">Improve your sleep quality and routine</p>
                   </div>
                 </div>
-              </motion.button>
-            </div>
+            </motion.button>
+          </div>
           ) : (
             <>
               <button
@@ -926,33 +1103,7 @@ export default function Resources() {
         </div>
       )}
 
-      {/* Original Resources Sections */}
-      <section className="card">
-        <h2 className="text-xl font-semibold">Academic Stress</h2>
-        <ul className="list">
-          <li><a className="text-primary underline" href="https://www.mind.org.uk/information-support/types-of-mental-health-problems/stress/" target="_blank" rel="noopener">Understanding stress</a></li>
-          <li><a className="text-primary underline" href="https://www.youtube.com/results?search_query=pomodoro+study" target="_blank" rel="noopener">Pomodoro study techniques</a></li>
-          <li><a className="text-primary underline" href="https://www.coursera.org/" target="_blank" rel="noopener">Free online courses (Coursera)</a></li>
-        </ul>
-      </section>
-
-      <section className="card">
-        <h2 className="text-xl font-semibold">Financial Stress</h2>
-        <ul className="list">
-          <li><a className="text-primary underline" href="https://www.nerdwallet.com/article/finance/how-to-budget" target="_blank" rel="noopener">How to budget</a></li>
-          <li><a className="text-primary underline" href="https://www.reddit.com/r/personalfinance/" target="_blank" rel="noopener">Personal finance community</a></li>
-          <li><a className="text-primary underline" href="https://www.khanacademy.org/college-careers-more/personal-finance" target="_blank" rel="noopener">Personal finance basics (Khan Academy)</a></li>
-        </ul>
-      </section>
-
-      <section className="card">
-        <h2 className="text-xl font-semibold">Emotional Well-being</h2>
-        <ul className="list">
-          <li><a className="text-primary underline" href="https://www.headspace.com/meditation/meditation-for-beginners" target="_blank" rel="noopener">Meditation for beginners</a></li>
-          <li><a className="text-primary underline" href="https://www.healthline.com/health/grounding-techniques" target="_blank" rel="noopener">Grounding techniques</a></li>
-          <li><a className="text-primary underline" href="https://988lifeline.org/" target="_blank" rel="noopener">988 Suicide & Crisis Lifeline (US)</a></li>
-        </ul>
-      </section>
+      {/* Removed legacy link-only sections per request */}
     </div>
   );
 }

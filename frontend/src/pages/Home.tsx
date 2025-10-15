@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const QUOTES = [
   { t: 'Small steps every day lead to big changes.', a: 'Mindly' },
@@ -180,12 +180,53 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <img 
-              src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1600&auto=format&fit=crop"
-              alt="Calm workspace"
-              className="w-full h-56 md:h-64 object-cover rounded-lg border border-border"
-              loading="lazy"
-            />
+            {(() => {
+              const base = import.meta.env.BASE_URL
+              const HERO_IMAGES = [
+                // meditation / yoga / peace / nature scenery
+                'https://images.unsplash.com/photo-1554344728-77cf90d9ed26?q=80&w=1600&auto=format&fit=crop', // yoga sunrise
+                'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1600&auto=format&fit=crop', // mist forest
+                'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop', // mountain lake
+                'https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1600&auto=format&fit=crop', // calm ocean
+                'https://images.unsplash.com/photo-1517832207067-4db24a2ae47c?q=80&w=1600&auto=format&fit=crop', // yoga mat
+                'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1600&auto=format&fit=crop', // pathway forest
+                'https://images.unsplash.com/photo-1501820488136-72669149e0d4?q=80&w=1600&auto=format&fit=crop', // beach peace
+                'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1600&auto=format&fit=crop', // meadow sun
+                'https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?q=80&w=1600&auto=format&fit=crop', // mountains clouds
+                'https://images.unsplash.com/photo-1502786129293-79981df4e689?q=80&w=1600&auto=format&fit=crop' // tranquil lake
+              ]
+              const [idx, setIdx] = useState(0)
+              useEffect(() => {
+                const id = setInterval(() => setIdx(i => (i + 1) % HERO_IMAGES.length), 4500)
+                return () => clearInterval(id)
+              }, [])
+              // Preload next image
+              useEffect(() => {
+                const next = new Image(); next.src = HERO_IMAGES[(idx + 1) % HERO_IMAGES.length]
+              }, [idx])
+              return (
+                <div className="relative h-56 md:h-64 rounded-lg border border-border overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.img
+                      key={idx}
+                      src={HERO_IMAGES[idx]}
+                      alt="Calming mindful scenery"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: 0, scale: 1.02 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.01 }}
+                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                      onError={(e)=>{(e.currentTarget as HTMLImageElement).style.opacity = '0.6'}}
+                    />
+                  </AnimatePresence>
+                  <div className="absolute bottom-2 right-3 flex gap-1">
+                    {HERO_IMAGES.map((_, i) => (
+                      <span key={i} className={`h-1.5 w-4 rounded-full ${i===idx? 'bg-primary-strong/90 dark:bg-primary-strong' : 'bg-white/60 dark:bg-white/30'}`}></span>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
             <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-white/10"></div>
           </motion.div>
         </div>
