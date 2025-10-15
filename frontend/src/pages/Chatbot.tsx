@@ -13,7 +13,7 @@ type Metrics = {
 const getSessionId = () => {
   let sessionId = localStorage.getItem('mindly_session_id')
   if (!sessionId) {
-    sessionId = session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     localStorage.setItem('mindly_session_id', sessionId)
   }
   return sessionId
@@ -74,7 +74,7 @@ export default function Chatbot() {
         <div className="grid grid-rows-[1fr_auto] gap-3 h-[60vh]">
           <div className="overflow-auto p-2 border border-border rounded-md bg-card space-y-2">
             {log.map((b, i) => (
-              <div key={i} className={bubble ${b.role}} style={{ whiteSpace: 'pre-wrap' }}>
+              <div key={i} className={`bubble ${b.role}`} style={{ whiteSpace: 'pre-wrap' }}>
                 {b.text}
               </div>
             ))}
@@ -107,8 +107,8 @@ export default function Chatbot() {
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-gray-200 rounded-full h-2">
                     <div 
-                      className={h-2 rounded-full ${value > 7 ? 'bg-red-500' : value > 4 ? 'bg-yellow-500' : 'bg-green-500'}}
-                      style={{ width: ${value * 10}% }}
+                      className={`h-2 rounded-full ${value > 7 ? 'bg-red-500' : value > 4 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                      style={{ width: `${value * 10}%` }}
                     />
                   </div>
                   <span className="text-sm font-semibold">{value}/10</span>
