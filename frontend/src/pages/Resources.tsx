@@ -685,7 +685,6 @@ export default function Resources() {
         <p className="subtitle">Goal-based modules and integrated mental health practices for holistic well-being</p>
       </motion.section>
 
-      {/* Learning Hub - Curated Articles, Blogs, Videos (moved to top) */}
       <motion.section 
         className="card"
         initial={{ opacity: 0, y: 12 }}
@@ -768,7 +767,7 @@ export default function Resources() {
         </div>
       </motion.section>
 
-      {/* Tab Navigation */}
+      
       <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => { setActiveTab('goals'); setActivePractice(null); }}
@@ -798,7 +797,7 @@ export default function Resources() {
         </button>
       </div>
 
-      {/* Goal Tracker Tab */}
+      
       {activeTab === 'goals' && (
         <div className="space-y-6">
           <section className="card">
@@ -965,7 +964,7 @@ export default function Resources() {
               ))}
             </div>
           </section>
-          {/* Milestone Celebrations */}
+          
           <section className="card bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-2 border-yellow-200 dark:border-yellow-800">
             <div className="flex items-start gap-3">
               <Award className="w-8 h-8 text-yellow-500 flex-shrink-0" />
@@ -994,7 +993,7 @@ export default function Resources() {
         </div>
       )}
 
-      {/* Mental Health Practices Tab */}
+      
       {activeTab === 'practices' && (
         <div className="space-y-6">
           {!activePractice ? (

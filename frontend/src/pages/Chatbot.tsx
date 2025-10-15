@@ -54,7 +54,6 @@ export default function Chatbot() {
   const [sessionId] = useState(getSessionId())
   const [currentMetrics, setCurrentMetrics] = useState<Metrics | null>(null)
 
-  // Load persisted chat and metrics for this session on mount/session change
   useEffect(() => {
     try {
       const storedLog = localStorage.getItem(CHAT_LOG_PREFIX + sessionId)
@@ -70,7 +69,6 @@ export default function Chatbot() {
     } catch {}
   }, [sessionId])
 
-  // Persist chat log and metrics whenever they change
   useEffect(() => {
     try {
       if (log.length) {

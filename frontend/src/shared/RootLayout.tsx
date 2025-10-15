@@ -8,7 +8,6 @@ export default function RootLayout() {
   return (
     <div className="min-h-screen text-foreground app-noise relative">
       <header className="sticky top-0 z-40">
-        {/* Enhanced navbar container with soft gradient and glassmorphism (tone aligned to peakmind.in) */}
         <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-3 rounded-xl border border-border shadow-card backdrop-blur supports-[backdrop-filter]:bg-white/50 bg-white/60 dark:supports-[backdrop-filter]:bg-card/70 dark:bg-card/80 bg-gradient-to-r from-purple-50/70 via-sky-50/70 to-emerald-50/70 dark:from-purple-400/15 dark:via-sky-400/15 dark:to-emerald-400/15">
             <Link to="/" className="inline-flex items-center gap-2 px-3 py-2">
@@ -24,7 +23,6 @@ export default function RootLayout() {
               />
               <span className="font-semibold text-lg tracking-tight" style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto' }}>Mindly</span>
             </Link>
-          {/* Enhanced navbar styling - soft gradient container */}
           <nav className="hidden md:flex items-center gap-1 p-1 rounded-full border border-border relative supports-[backdrop-filter]:bg-white/60 bg-white/50 dark:supports-[backdrop-filter]:bg-card/80 dark:bg-card/80 bg-gradient-to-r from-purple-200/60 via-sky-200/60 to-emerald-200/60 dark:from-purple-400/25 dark:via-sky-400/25 dark:to-emerald-400/25">
             <NavLink 
               to="/" 
