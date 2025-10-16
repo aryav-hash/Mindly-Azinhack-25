@@ -17,7 +17,6 @@ CORS(app)
 user_sessions = {}
 
 def extract_metrics(user_message, conversation_history):
-    """Extract mental health metrics from user message using AI"""
     try:
         metrics_prompt = f"""Analyze the following conversation and rate these metrics on a scale of 0-10:
     - Stress Level (0=calm, 10=extremely stressed)
@@ -38,9 +37,7 @@ def extract_metrics(user_message, conversation_history):
     JSON Response:"""
         
         response = model.generate_content(metrics_prompt)
-        # Parse the JSON response
         metrics_text = response.text.strip()
-        # Extract JSON from markdown code blocks if present
         if "```json" in metrics_text:
             metrics_text = metrics_text.split("```json")[1].split("```")[0].strip()
         elif "```" in metrics_text:
@@ -50,7 +47,6 @@ def extract_metrics(user_message, conversation_history):
         return metrics
     except Exception as e:
         print(f"Error extracting metrics: {e}")
-        # Return neutral values if extraction fails
         return {
             "stress": 5,
             "anxiety": 5,
@@ -60,88 +56,32 @@ def extract_metrics(user_message, conversation_history):
             "academic_pressure": 5
         }
 
-def get_ai_response(user_message, conversation_history=""):
+def get_ai_response(user_message, conversation_history="", questionnaire_context=""):
     try:
-        prompt = f"""You are "Mindly", a compassionate and understanding mental health assistant created to support students with empathy, respect, and care.
+        context_section = ""
+        if questionnaire_context:
+            context_section = f"""
+### User's Assessment Results:
+{questionnaire_context}
 
-        Your purpose is to help students reflect on their emotions, stress, motivation, and overall well-being. 
-        You must always:
-        - Listen carefully to the user’s messages without judgment.
-        - Respond in a warm, empathetic, and supportive tone.
-        - Reassure the user that what they’re feeling is valid.
-        - Provide gentle, non-clinical suggestions or coping techniques based on their situation.
-        - Always guide the user toward professional help when appropriate.
+Based on this assessment, provide targeted support and coping strategies for their specific concerns. Focus on practical, actionable advice.
+"""
+        
+        prompt = f"""You are Mindly, a supportive mental health assistant for students. Be warm, empathetic, and helpful.
 
-        ---
+Guidelines:
+- Listen without judgment and acknowledge their feelings
+- Provide practical coping strategies and gentle guidance
+- Keep responses concise and conversational
+- Focus on actionable advice they can try
+- If they need professional help, suggest reaching out to a counselor
 
-        ### Your Core Responsibilities:
-        1. **Empathic Listening:**
-        - Acknowledge feelings (e.g., “It sounds like you’re feeling really overwhelmed right now, and that’s completely okay.”)
-        - Avoid robotic or overly formal replies.
-        - Encourage the user to open up in a safe and supportive manner.
+{context_section}
+        
+Previous conversation: {conversation_history}
+Current message: {user_message}
 
-        2. **Recommendation and Reassurance:**
-        - Provide recommendations or coping techniques for emotional regulation, motivation, anxiety, or stress.
-        - Present insights and best practices in simple, student-friendly language.
-        - Use easy-to-understand examples when describing coping techniques.
-        - Where relevant, reference trusted materials or wellness resources from the “Resources and Wellness” section (e.g., breathing techniques, study planning, journaling, self-care).
-
-        3. **Assistance Areas:**
-        - Offer guidance on **mental**, **social**, **financial**, and **academic** needs.
-        - Help users find helpful practices or resources (e.g., budgeting tips, study breaks, time management).
-
-        4. **Metrics Evaluation (Internal Reasoning Only):**
-        - As you read the user’s responses, internally assess approximate levels of:
-            - **Stress**
-            - **Anxiety**
-            - **Loneliness**
-            - **Motivation**
-            - **Financial Burden**
-            - **Academic Pressure**
-        - These metrics should NOT be shown directly to the user unless requested, but may be stored or used by the system for analysis or visualization.
-        - Use the conversation tone, word choice, and sentiment to infer metric levels (e.g., high stress, low motivation).
-
-        5. **Professional Help Direction:**
-        - Always remind users that your role is supportive and not diagnostic.
-        - Encourage reaching out to a qualified counsellor, therapist, or trusted support line when distress seems high.
-
-        ---
-
-        ### Communication Guidelines:
-        - Use calm, clear, and reassuring language.
-        - Keep responses short, human, and natural.
-        - Avoid medical labels or diagnosis.
-        - Avoid giving direct medical, legal, or financial advice—only general guidance.
-        - End most messages with a gentle question or encouragement to help the user continue reflecting (e.g., “Would you like me to share a few ways to manage this feeling?”).
-
-        ---
-
-        ### When requested:
-        If the user asks for insights, summaries, or progress:
-        - Provide simple summaries of their emotional trends (e.g., “You’ve mentioned feeling stressed about exams a few times—would you like to explore some focus techniques?”)
-        - Suggest displaying their progress through charts or graphs in a friendly and motivating tone.
-
-        ---
-
-        ### Crisis Handling:
-        If a user expresses self-harm intent, hopelessness, or extreme distress:
-        - Immediately provide reassurance and suggest contacting a counsellor, trusted adult, or helpline.
-        - Example: 
-        “I’m really concerned to hear that. You don’t have to go through this alone — please consider reaching out to a counsellor or helpline. In India, you can contact AASRA at 91-9820466726 or the iCall helpline at +91 9152987821 for immediate support.”
-
-        ---
-
-        You are not a doctor or therapist.
-        You are a friendly, supportive AI that helps students feel heard, understood, and guided toward better mental health and professional help when needed.
-
-        Always be kind. Always be human.
-
-Previous Conversation History: 
-{conversation_history}       
-
-Current User Message: {user_message}
-
-Respond with care, empathy, and practical guidance based on the knowledge provided above."""
+Respond with care and practical guidance."""
         
         response = model.generate_content(prompt)
         return response.text
@@ -153,6 +93,7 @@ def chat():
     data = request.json
     user_message = data.get('message', '')
     session_id = data.get('session_id', 'default')
+    user_id = data.get('user_id')
 
     if not user_message.strip():
         return jsonify({'error': 'Empty message'}), 400
@@ -166,12 +107,14 @@ def chat():
     session = user_sessions[session_id]
     conversation_history = "\n".join([
         f"{'User' if i % 2 == 0 else 'Bot'}: {msg}" 
-        for i, msg in enumerate(session['history'][-6:])  # Last 3 exchanges
+        for i, msg in enumerate(session['history'][-6:])
     ])
+
+    questionnaire_context = get_questionnaire_context(user_id) if user_id else ""
 
     metrics = extract_metrics(user_message, conversation_history)
     
-    bot_response = get_ai_response(user_message, conversation_history)
+    bot_response = get_ai_response(user_message, conversation_history, questionnaire_context)
     
     session['history'].append(user_message)
     session['history'].append(bot_response)
@@ -188,7 +131,6 @@ def chat():
 
 @app.route('/api/metrics/<session_id>', methods=['GET'])
 def get_metrics(session_id):
-    """Get all metrics for a session"""
     if session_id not in user_sessions:
         return jsonify({'error': 'Session not found'}), 404
     
@@ -210,12 +152,108 @@ def get_metrics(session_id):
         'history': metrics_history
     })
 
-# PDF upload and knowledge base functionality removed due to dependency issues
-# These features can be re-added when PyMuPDF and ChromaDB are properly installed
+questionnaire_data = {}
+
+@app.route('/api/questionnaire/latest', methods=['POST'])
+def save_questionnaire():
+    try:
+        data = request.json
+        user_id = data.get('userId')
+        timestamp = data.get('timestamp')
+        responses = data.get('responses', {})
+        
+        print(f"DEBUG: Saving questionnaire data for user {user_id}")
+        print(f"DEBUG: Responses: {responses}")
+        
+        questionnaire_data[user_id] = {
+            'timestamp': timestamp,
+            'responses': responses
+        }
+        
+        print(f"DEBUG: Total users stored: {len(questionnaire_data)}")
+        
+        return jsonify({'saved': True, 'message': 'Questionnaire data saved'})
+    except Exception as e:
+        print(f"DEBUG: Error saving questionnaire: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/questionnaire/latest', methods=['GET'])
+def get_questionnaire():
+    try:
+        user_id = request.args.get('userId')
+        print(f"DEBUG: Fetching questionnaire data for user {user_id}")
+        print(f"DEBUG: Available users: {list(questionnaire_data.keys())}")
+        
+        if user_id and user_id in questionnaire_data:
+            print(f"DEBUG: Found data for user {user_id}")
+            return jsonify(questionnaire_data[user_id])
+        print(f"DEBUG: No data found for user {user_id}")
+        return jsonify({'error': 'No questionnaire data found'}), 404
+    except Exception as e:
+        print(f"DEBUG: Error fetching questionnaire: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+def get_questionnaire_context(user_id):
+    print(f"DEBUG: Getting questionnaire context for user {user_id}")
+    print(f"DEBUG: Available users: {list(questionnaire_data.keys())}")
+    
+    if user_id and user_id in questionnaire_data:
+        data = questionnaire_data[user_id]
+        responses = data.get('responses', {})
+        print(f"DEBUG: Found questionnaire data with {len(responses)} responses")
+        
+        context_parts = []
+        phq_responses = {k: v for k, v in responses.items() if k.startswith('phq')}
+        if phq_responses:
+            avg_phq = sum(phq_responses.values()) / len(phq_responses) if phq_responses else 0
+            if avg_phq >= 2:
+                context_parts.append(f"Depression concerns (PHQ: {avg_phq:.1f}/3)")
+        
+        ghq_responses = {k: v for k, v in responses.items() if k.startswith('ghq')}
+        if ghq_responses:
+            avg_ghq = sum(ghq_responses.values()) / len(ghq_responses) if ghq_responses else 0
+            if avg_ghq >= 2:
+                context_parts.append(f"Anxiety concerns (GHQ: {avg_ghq:.1f}/3)")
+        
+        pss_responses = {k: v for k, v in responses.items() if k.startswith('pss')}
+        if pss_responses:
+            avg_pss = sum(pss_responses.values()) / len(pss_responses) if pss_responses else 0
+            if avg_pss >= 2:
+                context_parts.append(f"Stress concerns (PSS: {avg_pss:.1f}/3)")
+        
+        ucla_responses = {k: v for k, v in responses.items() if k.startswith('ucla')}
+        if ucla_responses:
+            avg_ucla = sum(ucla_responses.values()) / len(ucla_responses) if ucla_responses else 0
+            if avg_ucla >= 3:
+                context_parts.append(f"Social isolation concerns (UCLA: {avg_ucla:.1f}/4)")
+        
+        fin_responses = {k: v for k, v in responses.items() if k.startswith('fin')}
+        if fin_responses:
+            avg_fin = sum(fin_responses.values()) / len(fin_responses) if fin_responses else 0
+            if avg_fin >= 3:
+                context_parts.append(f"Financial stress concerns (Score: {avg_fin:.1f}/4)")
+        
+        acad_responses = {k: v for k, v in responses.items() if k.startswith('acad')}
+        if acad_responses:
+            avg_acad = sum(acad_responses.values()) / len(acad_responses) if acad_responses else 0
+            if avg_acad <= 2:
+                context_parts.append(f"Low academic motivation (Score: {avg_acad:.1f}/4)")
+        
+        return " | ".join(context_parts) if context_parts else "No significant concerns identified"
+    
+    return ""
 
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok'})
+
+@app.route('/api/questionnaire/debug', methods=['GET'])
+def debug_questionnaire():
+    return jsonify({
+        'total_users': len(questionnaire_data),
+        'user_ids': list(questionnaire_data.keys()),
+        'data': questionnaire_data
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

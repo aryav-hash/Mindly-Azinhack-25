@@ -1,4 +1,17 @@
 import { FormEvent, useEffect, useState } from 'react'
+import { fetchLatestQuestionnaire } from '../api/questionnaire'
+
+function formatText(text: string): string {
+  let formatted = text
+  
+  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  
+  formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>')
+  
+  formatted = formatted.replace(/\n/g, '<br>')
+  
+  return formatted
+}
 
 type Bubble = { role: 'user' | 'bot'; text: string }
 type Metrics = {
@@ -22,14 +35,18 @@ const getSessionId = () => {
   return sessionId
 }
 
-async function generateReply(message: string, sessionId: string): Promise<{response: string, metrics: Metrics}> {
+async function generateReply(message: string, sessionId: string, userId?: string): Promise<{response: string, metrics: Metrics}> {
   try {
     const response = await fetch('http://localhost:5000/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message, session_id: sessionId }),
+      body: JSON.stringify({ 
+        message, 
+        session_id: sessionId,
+        user_id: userId
+      }),
     })
     
     if (!response.ok) {
@@ -53,6 +70,64 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false)
   const [sessionId] = useState(getSessionId())
   const [currentMetrics, setCurrentMetrics] = useState<Metrics | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      const currentUserId = localStorage.getItem('mindly_current_user_id')
+      if (currentUserId) {
+        setUserId(currentUserId)
+        triggerAutoResponse(currentUserId)
+        return
+      }
+      
+      const questionnaireRuns = localStorage.getItem('mindly_questionnaire_runs')
+      if (questionnaireRuns) {
+        const runs = JSON.parse(questionnaireRuns)
+        if (runs.length > 0) {
+          const latestRun = runs[0]
+          if (latestRun.id) {
+            setUserId(latestRun.id)
+            triggerAutoResponse(latestRun.id)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error getting questionnaire user ID:', error)
+    }
+  }, [])
+  async function triggerAutoResponse(userId: string) {
+    try {
+      setLoading(true)
+      
+      const questionnaireResult = await fetchLatestQuestionnaire(userId)
+      if (questionnaireResult.ok && questionnaireResult.data) {
+        console.log('Fetched questionnaire data:', questionnaireResult.data)
+        
+        const prompt = `Based on my recent mental health assessment, please provide personalized insights and recommendations. Here are my responses:
+        
+        Assessment Results:
+        ${JSON.stringify(questionnaireResult.data.responses, null, 2)}
+        
+        Please analyze these responses and provide tailored advice, coping strategies, and recommendations for my mental wellbeing.`
+        
+        const { response: reply, metrics } = await generateReply(
+          prompt, 
+          sessionId, 
+          userId
+        )
+        setLog(l => [...l, { role: 'bot', text: reply }])
+        setCurrentMetrics(metrics)
+      } else {
+        console.error('Failed to fetch questionnaire data:', questionnaireResult.error)
+        setLog([{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today? 😊" }])
+      }
+      setLoading(false)
+    } catch (error) {
+      console.error('Error generating auto-response:', error)
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     try {
@@ -61,7 +136,12 @@ export default function Chatbot() {
       if (storedLog) {
         setLog(JSON.parse(storedLog))
       } else {
-        setLog([{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today? 😊" }])
+        const hasQuestionnaireData = localStorage.getItem('mindly_current_user_id') || localStorage.getItem('mindly_questionnaire_runs')
+        if (!hasQuestionnaireData) {
+          setLog([{ role: 'bot', text: "Hey! I'm Mindly. How can I support you today? 😊" }])
+        } else {
+          setLog([])
+        }
       }
       if (storedMetrics) {
         setCurrentMetrics(JSON.parse(storedMetrics))
@@ -89,9 +169,11 @@ export default function Chatbot() {
     const welcome = { role: 'bot', text: "Hey! I'm Mindly. How can I support you today? 😊" } as Bubble
     setLog([welcome])
     setCurrentMetrics(null)
+    setUserId(null)
     try {
       localStorage.setItem(CHAT_LOG_PREFIX + sessionId, JSON.stringify([welcome]))
       localStorage.removeItem(CHAT_METRICS_PREFIX + sessionId)
+      localStorage.removeItem('mindly_current_user_id')
     } catch {}
   }
 
@@ -104,7 +186,7 @@ export default function Chatbot() {
     setInput('')
     setLoading(true)
     
-    const { response: reply, metrics } = await generateReply(text, sessionId)
+    const { response: reply, metrics } = await generateReply(text, sessionId, userId || undefined)
     setLog(l => [...l, { role: 'bot', text: reply }])
     setCurrentMetrics(metrics)
     setLoading(false)
@@ -117,6 +199,11 @@ export default function Chatbot() {
           <div>
             <h1 className="text-2xl font-bold">Mindly Chatbot</h1>
             <p className="subtitle">A friendly companion for quick check-ins and tips.</p>
+            {userId && (
+              <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm inline-block">
+                📊 Using your questionnaire data for personalized responses
+              </div>
+            )}
           </div>
           <button onClick={newConversation} className="btn btn-outline">New Conversation</button>
         </div>
@@ -124,7 +211,11 @@ export default function Chatbot() {
           <div className="overflow-auto p-2 border border-border rounded-md bg-card space-y-2">
             {log.map((b, i) => (
               <div key={i} className={`bubble ${b.role}`} style={{ whiteSpace: 'pre-wrap' }}>
-                {b.text}
+                {b.role === 'bot' ? (
+                  <div dangerouslySetInnerHTML={{ __html: formatText(b.text) }} />
+                ) : (
+                  b.text
+                )}
               </div>
             ))}
             {loading && <div className="bubble bot">Thinking... 💭</div>}
