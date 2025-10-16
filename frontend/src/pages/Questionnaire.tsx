@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { saveLatestQuestionnaire } from '../api/questionnaire'
 
 type Question = {
   id: string
@@ -100,6 +102,7 @@ const sections: Section[] = [
 ]
 
 export default function Questionnaire() {
+  const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [responses, setResponses] = useState<Record<string, number>>({})
   const [showSummary, setShowSummary] = useState(false)
@@ -116,7 +119,6 @@ export default function Questionnaire() {
         if (Array.isArray(parsed)) setRuns(parsed)
       }
     } catch {}
-    // Restore draft if present
     try {
       const draftRaw = localStorage.getItem(DRAFT_KEY)
       if (draftRaw) {
@@ -130,7 +132,6 @@ export default function Questionnaire() {
     } catch {}
   }, [])
 
-  // Persist draft on changes so navigation away and back restores state
   useEffect(() => {
     try {
       const draft = {
@@ -162,17 +163,41 @@ export default function Questionnaire() {
       setCurrentIndex(currentIndex + 1)
     } else {
       setShowSummary(true)
-      // Save this run
       const run = {
         id: String(Date.now()),
         timestamp: new Date().toISOString(),
         responses: { ...responses },
       }
-      const updated = [run, ...runs].slice(0, 20) // keep last 20
+      const updated = [run, ...runs].slice(0, 20)
       setRuns(updated)
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+        saveQuestionnaireToBackend(run)
       } catch {}
+    }
+  }
+
+  async function saveQuestionnaireToBackend(run: any) {
+    try {
+      const userId = 'user_' + Date.now()
+      
+      const result = await saveLatestQuestionnaire({
+        userId: userId,
+        timestamp: run.timestamp,
+        responses: run.responses,
+      })
+      
+      if (result.ok) {
+        console.log('Questionnaire data saved for chatbot integration')
+        localStorage.setItem('mindly_current_user_id', userId)
+        setTimeout(() => {
+          navigate('/chatbot')
+        }, 2000)
+      } else {
+        console.error('Failed to save questionnaire data:', result.error)
+      }
+    } catch (error) {
+      console.error('Failed to save questionnaire data:', error)
     }
   }
 
@@ -289,41 +314,48 @@ export default function Questionnaire() {
               <a href="/booking" className="px-3 py-1.5 rounded-md bg-primary text-white">Book a counselor</a>
               <button onClick={restart} className="px-3 py-1.5 rounded-md border btn-outline">Take questionnaire again</button>
             </div>
-
-            {runs.length > 0 && (
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-semibold">Past runs</div>
-                  <button onClick={clearHistory} className="text-xs px-2 py-1 rounded-md border btn-outline">Clear history</button>
-                </div>
-                <div className="grid gap-2">
-                  {runs.map((r, idx) => {
-                    const perSection = sections.map((s) => {
-                      const vals = s.questions.map(q => r.responses[q.id]).filter(v => v !== undefined)
-                      const avg = vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 100) / 100 : 0
-                      return { key: s.key, title: s.title, avg }
-                    })
-                    const ts = new Date(r.timestamp)
-                    return (
-                      <div key={r.id} className="rounded-lg border border-border p-3 bg-card">
-                        <div className="text-sm text-muted">Run {runs.length - idx} • {ts.toLocaleString()}</div>
-                        <div className="mt-2 grid md:grid-cols-3 gap-2 text-sm">
-                          {perSection.map(ps => (
-                            <div key={ps.key} className="rounded border border-border px-2 py-1 bg-card">
-                              <div className="truncate font-medium">{ps.title}</div>
-                              <div>Avg: {ps.avg}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+            
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-sm text-blue-800">
+                <strong>💡 Redirecting to Chatbot:</strong> Your responses have been saved and will help the chatbot provide more personalized support. 
+                You'll be automatically redirected to the chatbot in a moment for tailored advice based on your assessment!
               </div>
-            )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {runs.length > 0 && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="font-semibold">Past runs</div>
+            <button onClick={clearHistory} className="text-xs px-2 py-1 rounded-md border btn-outline">Clear history</button>
+          </div>
+          <div className="grid gap-2">
+            {runs.map((r, idx) => {
+              const perSection = sections.map((s) => {
+                const vals = s.questions.map(q => r.responses[q.id]).filter(v => v !== undefined)
+                const avg = vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 100) / 100 : 0
+                return { key: s.key, title: s.title, avg }
+              })
+              const ts = new Date(r.timestamp)
+              return (
+                <div key={r.id} className="rounded-lg border border-border p-3 bg-card">
+                  <div className="text-sm text-muted">Run {runs.length - idx} • {ts.toLocaleString()}</div>
+                  <div className="mt-2 grid md:grid-cols-3 gap-2 text-sm">
+                    {perSection.map(ps => (
+                      <div key={ps.key} className="rounded border border-border px-2 py-1 bg-card">
+                        <div className="truncate font-medium">{ps.title}</div>
+                        <div>Avg: {ps.avg}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="text-xs text-muted">
         This is not a diagnosis. If you are in crisis, please reach out to a professional or a trusted helpline.
